@@ -24,6 +24,7 @@ type Configuration interface {
 	Insecure() bool
 	AuthorizationEndpoint() *Endpoint
 	TokenEndpoint() *Endpoint
+	DiscoveryEndpoint() *Endpoint
 	IntrospectionEndpoint() *Endpoint
 	UserinfoEndpoint() *Endpoint
 	RevocationEndpoint() *Endpoint

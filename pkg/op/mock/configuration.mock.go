@@ -72,10 +72,24 @@ func (m *MockConfiguration) AuthorizationEndpoint() *op.Endpoint {
 	return ret0
 }
 
+// AuthorizationEndpoint mocks base method.
+func (m *MockConfiguration) DiscoveryEndpoint() *op.Endpoint {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DiscoveryEndpoint")
+	ret0, _ := ret[0].(*op.Endpoint)
+	return ret0
+}
+
 // AuthorizationEndpoint indicates an expected call of AuthorizationEndpoint.
 func (mr *MockConfigurationMockRecorder) AuthorizationEndpoint() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizationEndpoint", reflect.TypeOf((*MockConfiguration)(nil).AuthorizationEndpoint))
+}
+
+// AuthorizationEndpoint indicates an expected call of AuthorizationEndpoint.
+func (mr *MockConfigurationMockRecorder) DiscoveryEndpoint() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DiscoveryEndpoint", reflect.TypeOf((*MockConfiguration)(nil).DiscoveryEndpoint()))
 }
 
 // BackChannelLogoutSessionSupported mocks base method.

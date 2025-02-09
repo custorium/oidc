@@ -23,6 +23,7 @@ const (
 	readinessEndpoint            = "/ready"
 	authCallbackPathSuffix       = "/callback"
 	defaultAuthorizationEndpoint = "authorize"
+	defaultDiscoveryEndpoint     = ".well-known/openid-configuration"
 	defaultTokenEndpoint         = "oauth/token"
 	defaultIntrospectEndpoint    = "oauth/introspect"
 	defaultUserinfoEndpoint      = "userinfo"
@@ -35,6 +36,7 @@ const (
 var (
 	DefaultEndpoints = &Endpoints{
 		Authorization:       NewEndpoint(defaultAuthorizationEndpoint),
+		Discovery:           NewEndpoint(defaultDiscoveryEndpoint),
 		Token:               NewEndpoint(defaultTokenEndpoint),
 		Introspection:       NewEndpoint(defaultIntrospectEndpoint),
 		Userinfo:            NewEndpoint(defaultUserinfoEndpoint),
@@ -133,7 +135,7 @@ func CreateRouter(o OpenIDProvider, interceptors ...HttpInterceptor) chi.Router 
 	router.Use(intercept(o.IssuerFromRequest, interceptors...))
 	router.HandleFunc(healthEndpoint, healthHandler)
 	router.HandleFunc(readinessEndpoint, readyHandler(o.Probes()))
-	router.HandleFunc(oidc.DiscoveryEndpoint, discoveryHandler(o, o.Storage()))
+	router.HandleFunc(o.DiscoveryEndpoint().Relative(), discoveryHandler(o, o.Storage()))
 	router.HandleFunc(o.AuthorizationEndpoint().Relative(), authorizeHandler(o))
 	router.HandleFunc(authCallbackPath(o), AuthorizeCallbackHandler(o))
 	router.HandleFunc(o.TokenEndpoint().Relative(), tokenHandler(o))
@@ -184,6 +186,7 @@ type Endpoints struct {
 	CheckSessionIframe  *Endpoint
 	JwksURI             *Endpoint
 	DeviceAuthorization *Endpoint
+	Discovery           *Endpoint
 }
 
 // NewOpenIDProvider creates a provider. The provider provides (with HttpHandler())
@@ -315,6 +318,10 @@ func (o *Provider) AuthorizationEndpoint() *Endpoint {
 	return o.endpoints.Authorization
 }
 
+func (o *Provider) DiscoveryEndpoint() *Endpoint {
+	return o.endpoints.Discovery
+}
+
 func (o *Provider) TokenEndpoint() *Endpoint {
 	return o.endpoints.Token
 }
@@ -324,6 +331,10 @@ func (o *Provider) IntrospectionEndpoint() *Endpoint {
 }
 
 func (o *Provider) UserinfoEndpoint() *Endpoint {
+	return o.endpoints.Userinfo
+}
+
+func (o *Provider) DiscoveryEndpointEndpoint() *Endpoint {
 	return o.endpoints.Userinfo
 }
 
@@ -509,6 +520,16 @@ func WithCustomAuthEndpoint(endpoint *Endpoint) Option {
 			return err
 		}
 		o.endpoints.Authorization = endpoint
+		return nil
+	}
+}
+
+func WithCustomDiscoveryEndpoint(endpoint *Endpoint) Option {
+	return func(o *Provider) error {
+		if err := endpoint.Validate(); err != nil {
+			return err
+		}
+		o.endpoints.Discovery = endpoint
 		return nil
 	}
 }
