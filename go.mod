@@ -21,6 +21,7 @@ require (
 	go.opentelemetry.io/otel v1.29.0
 	golang.org/x/oauth2 v0.26.0
 	golang.org/x/text v0.22.0
+	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
 require (
