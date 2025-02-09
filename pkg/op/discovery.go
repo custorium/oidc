@@ -46,6 +46,7 @@ func CreateDiscoveryConfig(ctx context.Context, config Configuration, storage Di
 		JwksURI:                                    config.KeysEndpoint().Absolute(issuer),
 		DeviceAuthorizationEndpoint:                config.DeviceAuthorizationEndpoint().Absolute(issuer),
 		ScopesSupported:                            Scopes(config),
+		ResponseModesSupported:                     ResponseModes(config),
 		ResponseTypesSupported:                     ResponseTypes(config),
 		GrantTypesSupported:                        GrantTypes(config),
 		SubjectTypesSupported:                      SubjectTypes(config),
@@ -115,6 +116,14 @@ func ResponseTypes(c Configuration) []string {
 	} // TODO: ok for now, check later if dynamic needed
 }
 
+func ResponseModes(c Configuration) []string {
+	return []string{
+		string(oidc.ResponseModeFormPost),
+		string(oidc.ResponseModeFragment),
+		string(oidc.ResponseModeQuery),
+	} // TODO: ok for now, check later if dynamic needed
+}
+
 func GrantTypes(c Configuration) []oidc.GrantType {
 	grantTypes := []oidc.GrantType{
 		oidc.GrantTypeCode,
@@ -139,7 +148,7 @@ func GrantTypes(c Configuration) []oidc.GrantType {
 }
 
 func SubjectTypes(c Configuration) []string {
-	return []string{"public"} // TODO: config
+	return []string{"public"}
 }
 
 func SigAlgorithms(ctx context.Context, storage DiscoverStorage) []string {
