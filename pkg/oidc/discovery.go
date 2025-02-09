@@ -153,6 +153,17 @@ type DiscoveryConfiguration struct {
 	// BackChannelLogoutSessionSupported specifies whether the OP can pass a sid (session ID) Claim in the Logout Token to identify the RP session with the OP.
 	// If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false.
 	BackChannelLogoutSessionSupported bool `json:"backchannel_logout_session_supported,omitempty"`
+
+	//Needed for ATProto
+	// https://www.ietf.org/archive/id/draft-meyerzuselhausen-oauth-iss-auth-resp-02.html
+	// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-dpop-11
+	// https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/
+	// https://www.ietf.org/archive/id/draft-ietf-oauth-par-03.html
+	AuthorizationResponseIssParameterSupported bool     `json:"authorization_response_iss_parameter_supported,omitempty"`
+	DpopSigningAlgValuesSupported              []string `json:"dpop_signing_alg_values_supported,omitempty"`
+	ClientIdMetadataDocumentSupported          bool     `json:"client_id_metadata_document_supported,omitempty"`
+	PushedAuthorizationRequestEndpoint         string   `json:"pushed_authorization_request_endpoint,omitempty"`
+	RequirePushedAuthorizationRequests         bool     `json:"require_pushed_authorization_requests,omitempty"`
 }
 
 type AuthMethod string
