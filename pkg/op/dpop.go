@@ -116,7 +116,7 @@ func getThumbprint(webkey jose.JSONWebKey, alg jose.SignatureAlgorithm) ([]byte,
 // 	string
 // }
 
-func GetDPopThumbprint(w http.ResponseWriter, r *http.Request) (*string, error) {
+func GetDPopThumbprint(r *http.Request) (*string, error) {
 	dPopHeaders := r.Header.Values(DPoPHeaderKey)
 	if len(dPopHeaders) == 0 {
 		return nil, nil
@@ -184,7 +184,7 @@ type Error struct {
 
 func DPoPInterceptor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		thumbprint, err := GetDPopThumbprint(w, r)
+		thumbprint, err := GetDPopThumbprint(r)
 		if err != nil {
 			MarshalJSONWithStatus(w, &Error{ErrorType: dPopError, Description: err.Error()}, http.StatusBadRequest)
 		} else if thumbprint != nil {
