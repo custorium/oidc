@@ -116,45 +116,42 @@ func getThumbprint(webkey jose.JSONWebKey, alg jose.SignatureAlgorithm) ([]byte,
 // 	string
 // }
 
-func checkDPop(h http.Handler, w http.ResponseWriter, r *http.Request) error {
+func CheckDPop(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	dPopHeaders := r.Header.Values(DPoPHeaderKey)
 	if len(dPopHeaders) == 0 {
-		h.ServeHTTP(w, r) // call original
-		return nil
+		return r, nil
 	} else {
 		if len(dPopHeaders) != 1 || dPopHeaders[0] == "" || len(dPopHeaders[0]) < 3 {
-			return errors.New(notAValidJWT)
+			return nil, errors.New(notAValidJWT)
 		}
 		dPopHeader := dPopHeaders[0]
 		dPopJwt, jwterr := jwt.ParseSigned(dPopHeader)
 		dPopJws, jwserr := jose.ParseSigned(dPopHeader)
 		if jwterr != nil || jwserr != nil {
-			return errors.New(notAValidJWT)
+			return nil, errors.New(notAValidJWT)
 		}
 		if !isValidDPoPHeader(dPopJwt.Headers) {
-			return errors.New(invalidDPoPHeader)
+			return nil, errors.New(invalidDPoPHeader)
 		}
 		rawPayload, err := dPopJws.Verify((dPopJwt.Headers[len(dPopJwt.Headers)-1].JSONWebKey.Public()))
 		if err != nil {
-			return errors.New(invalidSignature)
+			return nil, errors.New(invalidSignature)
 		}
 		payload := dPopPayload{}
 		json.Unmarshal(rawPayload, &payload)
 		if !isValidDPoPPayload(&payload) {
-			return errors.New(missingClaims)
+			return nil, errors.New(missingClaims)
 		}
 		if !isValidMethodAndUri(&payload, r) {
-			return errors.New(wrongMethodOrUri)
+			return nil, errors.New(wrongMethodOrUri)
 		}
 		jwtHeader := dPopJwt.Headers[len(dPopJwt.Headers)-1]
 		public := jwtHeader.JSONWebKey.Public()
 		thumbPrint, err := getThumbprint(public, jose.SignatureAlgorithm(jwtHeader.Algorithm))
 		if err != nil {
-			return err
+			return nil, err
 		}
-		req := r.WithContext(context.WithValue(r.Context(), DPopThumbprint, b64.URLEncoding.WithPadding(b64.NoPadding).EncodeToString(thumbPrint)))
-		h.ServeHTTP(w, req) // call original
-		return nil
+		return r.WithContext(context.WithValue(r.Context(), DPopThumbprint, b64.URLEncoding.WithPadding(b64.NoPadding).EncodeToString(thumbPrint))), nil
 	}
 }
 
@@ -186,9 +183,11 @@ type Error struct {
 
 func DPoPInterceptor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := checkDPop(h, w, r)
+		req, err := CheckDPop(w, r)
 		if err != nil {
 			MarshalJSONWithStatus(w, &Error{ErrorType: dPopError, Description: err.Error()}, http.StatusBadRequest)
+		} else {
+			h.ServeHTTP(w, req)
 		}
 	})
 }
