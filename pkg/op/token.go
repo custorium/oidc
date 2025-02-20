@@ -57,12 +57,17 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 		}
 	}
 
+	tokenType := oidc.BearerToken
+	if ctx.Value(DPopThumbprint) != nil {
+		tokenType = DPoPHeaderKey
+	}
+
 	exp := uint64(validity.Seconds())
 	return &oidc.AccessTokenResponse{
 		AccessToken:  accessToken,
 		IDToken:      idToken,
 		RefreshToken: newRefreshToken,
-		TokenType:    oidc.BearerToken,
+		TokenType:    tokenType,
 		ExpiresIn:    exp,
 		State:        state,
 		Scope:        request.GetScopes(),
@@ -155,6 +160,10 @@ func CreateJWT(ctx context.Context, issuer string, tokenRequest TokenRequest, ex
 		}
 		claims.Claims = privateClaims
 	}
+	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
+		cnf := map[string]any{"jkt": thumbprint}
+		claims.Claims["cnf"] = cnf
+	}
 	if actorReq, ok := tokenRequest.(TokenActorRequest); ok {
 		claims.Actor = actorReq.GetActor()
 	}
@@ -238,6 +247,10 @@ func CreateIDToken(ctx context.Context, issuer string, request IDTokenRequest, v
 			return "", err
 		}
 		claims.CodeHash = codeHash
+	}
+	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
+		cnf := map[string]any{"jkt": thumbprint}
+		claims.Claims["cnf"] = cnf
 	}
 	signer, err := SignerFromKey(signingKey)
 	if err != nil {
