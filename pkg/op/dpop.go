@@ -82,11 +82,19 @@ func isValidMethodAndUri(payload *dPopPayload, r *http.Request) bool {
 	if !strings.EqualFold(payload.HttpMethod, r.Method) {
 		return false
 	}
-	method := "https"
-	if r.TLS == nil {
-		method = "http"
+
+	method := r.Method
+	fm := r.Header.Get("X-Forwarded-Proto")
+	if fm != "" {
+		method = fm
 	}
-	requestUri := fmt.Sprintf("%s://%s%s", method, r.Host, r.RequestURI)
+	host := r.Host
+	fh := r.Header.Get("X-Forwarded-Host")
+	if fh != "" {
+		host = fh
+	}
+
+	requestUri := fmt.Sprintf("%s://%s%s", method, host, r.RequestURI)
 	if !strings.EqualFold(payload.HttpUri, requestUri) {
 		log.Println(payload.HttpUri)
 		log.Println(requestUri)
