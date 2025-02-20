@@ -116,10 +116,10 @@ func getThumbprint(webkey jose.JSONWebKey, alg jose.SignatureAlgorithm) ([]byte,
 // 	string
 // }
 
-func CheckDPop(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
+func GetDPopThumbprint(w http.ResponseWriter, r *http.Request) (*string, error) {
 	dPopHeaders := r.Header.Values(DPoPHeaderKey)
 	if len(dPopHeaders) == 0 {
-		return r, nil
+		return nil, nil
 	} else {
 		if len(dPopHeaders) != 1 || dPopHeaders[0] == "" || len(dPopHeaders[0]) < 3 {
 			return nil, errors.New(notAValidJWT)
@@ -151,7 +151,8 @@ func CheckDPop(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 		if err != nil {
 			return nil, err
 		}
-		return r.WithContext(context.WithValue(r.Context(), DPopThumbprint, b64.URLEncoding.WithPadding(b64.NoPadding).EncodeToString(thumbPrint))), nil
+		thumbprint := b64.URLEncoding.WithPadding(b64.NoPadding).EncodeToString(thumbPrint)
+		return &thumbprint, nil
 	}
 }
 
@@ -183,11 +184,13 @@ type Error struct {
 
 func DPoPInterceptor(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req, err := CheckDPop(w, r)
+		thumbprint, err := GetDPopThumbprint(w, r)
 		if err != nil {
 			MarshalJSONWithStatus(w, &Error{ErrorType: dPopError, Description: err.Error()}, http.StatusBadRequest)
+		} else if thumbprint != nil {
+			h.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), DPopThumbprint, *thumbprint)))
 		} else {
-			h.ServeHTTP(w, req)
+			h.ServeHTTP(w, r)
 		}
 	})
 }
