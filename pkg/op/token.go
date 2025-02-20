@@ -162,6 +162,9 @@ func CreateJWT(ctx context.Context, issuer string, tokenRequest TokenRequest, ex
 	}
 	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
 		cnf := map[string]any{"jkt": thumbprint}
+		if claims.Claims == nil {
+			claims.Claims = map[string]any{}
+		}
 		claims.Claims["cnf"] = cnf
 	}
 	if actorReq, ok := tokenRequest.(TokenActorRequest); ok {
@@ -250,6 +253,9 @@ func CreateIDToken(ctx context.Context, issuer string, request IDTokenRequest, v
 	}
 	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
 		cnf := map[string]any{"jkt": thumbprint}
+		if claims.Claims == nil {
+			claims.Claims = map[string]any{}
+		}
 		claims.Claims["cnf"] = cnf
 	}
 	signer, err := SignerFromKey(signingKey)
