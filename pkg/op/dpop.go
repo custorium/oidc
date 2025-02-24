@@ -72,9 +72,9 @@ func isValidDPoPPayload(payload *dPopPayload) bool {
 	if payload.TokenId == "" || payload.HttpMethod == "" || payload.HttpUri == "" {
 		return false
 	}
-	if payload.Nonce != "" {
-		return false // nonce not yet supported
-	}
+	// if payload.Nonce != "" {
+	// 	return false // nonce not yet supported
+	// }
 	return true
 }
 
