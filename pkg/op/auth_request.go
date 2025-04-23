@@ -482,11 +482,13 @@ func AuthResponseCode(w http.ResponseWriter, r *http.Request, authReq AuthReques
 		return
 	}
 	codeResponse := struct {
-		Code  string `schema:"code"`
-		State string `schema:"state,omitempty"`
+		Code   string `schema:"code"`
+		State  string `schema:"state,omitempty"`
+		Issuer string `schema:"iss,omitempty"`
 	}{
-		Code:  code,
-		State: authReq.GetState(),
+		Code:   code,
+		State:  authReq.GetState(),
+		Issuer: IssuerFromContext(r.Context()),
 	}
 
 	if authReq.GetResponseMode() == oidc.ResponseModeFormPost {
