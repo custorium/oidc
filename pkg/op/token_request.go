@@ -59,7 +59,7 @@ func Exchange(w http.ResponseWriter, r *http.Request, exchanger Exchanger) {
 		for k := range v {
 			data.Add(k, v[k])
 		}
-
+		r.Header.Set("Content-type", "application/x-www-form-urlencode")
 		r.Body = io.NopCloser(strings.NewReader(data.Encode()))
 	} else {
 		r = r.WithContext(ctx)
