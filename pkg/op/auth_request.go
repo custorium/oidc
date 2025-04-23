@@ -625,6 +625,7 @@ func AuthResponseFormPost(res http.ResponseWriter, redirectURI string, response 
 
 func setFragment(uri *url.URL, params url.Values) string {
 	uri.RawFragment = params.Encode()
+	uri.Fragment = uri.RawFragment
 	return uri.String()
 }
 
