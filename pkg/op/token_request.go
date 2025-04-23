@@ -2,9 +2,12 @@ package op
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 
 	httphelper "github.com/zitadel/oidc/v3/pkg/http"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
@@ -38,7 +41,30 @@ func tokenHandler(exchanger Exchanger) func(w http.ResponseWriter, r *http.Reque
 // Exchange performs a token exchange appropriate for the grant type
 func Exchange(w http.ResponseWriter, r *http.Request, exchanger Exchanger) {
 	ctx, span := tracer.Start(r.Context(), "Exchange")
-	r = r.WithContext(ctx)
+	if r.Header.Get("Content-type") == "application/json" {
+		r = r.Clone(ctx)
+		defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		var v map[string]string
+		err = json.Unmarshal(body, &v)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		data := url.Values{}
+		for k := range v {
+			data.Add(k, v[k])
+		}
+
+		r.Body = io.NopCloser(strings.NewReader(data.Encode()))
+	} else {
+		r = r.WithContext(ctx)
+
+	}
 	defer span.End()
 
 	grantType := r.FormValue("grant_type")
