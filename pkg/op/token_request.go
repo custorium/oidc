@@ -41,6 +41,7 @@ func tokenHandler(exchanger Exchanger) func(w http.ResponseWriter, r *http.Reque
 // Exchange performs a token exchange appropriate for the grant type
 func Exchange(w http.ResponseWriter, r *http.Request, exchanger Exchanger) {
 	ctx, span := tracer.Start(r.Context(), "Exchange")
+	// convert json payload to application/x-www-form-urlencoded
 	if r.Header.Get("Content-type") == "application/json" {
 		r = r.Clone(ctx)
 		defer r.Body.Close()

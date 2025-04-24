@@ -169,7 +169,7 @@ func ParseRequestObject(ctx context.Context, authReq *oidc.AuthRequest, storage 
 // CopyRequestObjectToAuthRequest overwrites present values from the Request Object into the auth request
 // and clears the `RequestParam` of the auth request
 func CopyRequestObjectToAuthRequest(authReq *oidc.AuthRequest, requestObject *oidc.RequestObject) {
-	if slices.Contains(authReq.Scopes, oidc.ScopeOpenID) && len(requestObject.Scopes) > 0 {
+	if len(requestObject.Scopes) > 0 {
 		authReq.Scopes = requestObject.Scopes
 	}
 	if requestObject.RedirectURI != "" {
