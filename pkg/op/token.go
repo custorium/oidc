@@ -92,7 +92,7 @@ func createTokens(ctx context.Context, tokenRequest TokenRequest, storage Storag
 func needsRefreshToken(tokenRequest TokenRequest, client AccessTokenClient) bool {
 	switch req := tokenRequest.(type) {
 	case AuthRequest:
-		return slices.Contains(req.GetScopes(), oidc.ScopeOfflineAccess) && req.GetResponseType() == oidc.ResponseTypeCode && ValidateGrantType(client, oidc.GrantTypeRefreshToken)
+		return req.GetResponseType() == oidc.ResponseTypeCode && ValidateGrantType(client, oidc.GrantTypeRefreshToken)
 	case TokenExchangeRequest:
 		return req.GetRequestedTokenType() == oidc.RefreshTokenType
 	case RefreshTokenRequest:
