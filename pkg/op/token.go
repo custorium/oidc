@@ -71,6 +71,7 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 		ExpiresIn:    exp,
 		State:        state,
 		Scope:        request.GetScopes(),
+		Sub:          request.GetSubject(),
 	}, nil
 }
 
