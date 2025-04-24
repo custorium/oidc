@@ -108,6 +108,10 @@ func (a *AuthRequest) GetScopes() []string {
 	return a.Scopes
 }
 
+func (a *AuthRequest) GetLoginHint() string {
+	return a.LoginHint
+}
+
 func (a *AuthRequest) GetState() string {
 	return a.TransferState
 }

@@ -35,6 +35,7 @@ type AuthRequest interface {
 	GetScopes() []string
 	GetState() string
 	GetSubject() string
+	GetLoginHint() string
 	Done() bool
 }
 
