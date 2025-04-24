@@ -31,7 +31,8 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 	ctx, span := tracer.Start(ctx, "CreateTokenResponse")
 	defer span.End()
 
-	var accessToken, newRefreshToken string
+	var accessToken, newRefreshToken, idToken string
+	var err error
 	var validity time.Duration
 	if createAccessToken {
 		var err error
@@ -40,9 +41,11 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 			return nil, err
 		}
 	}
-	idToken, err := CreateIDToken(ctx, IssuerFromContext(ctx), request, client.IDTokenLifetime(), accessToken, code, creator.Storage(), client)
-	if err != nil {
-		return nil, err
+	if slices.Contains(request.GetScopes(), oidc.ScopeOpenID) {
+		idToken, err = CreateIDToken(ctx, IssuerFromContext(ctx), request, client.IDTokenLifetime(), accessToken, code, creator.Storage(), client)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var state string
