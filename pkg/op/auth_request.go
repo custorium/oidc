@@ -210,7 +210,7 @@ func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authoriz
 		return
 	}
 
-	if authReq.RedirectURI != "" {
+	if authReq.RequestUri != "" {
 		RequestError(w, r, fmt.Errorf("request_uri not accepted on par endpoint"), authorizer.Logger())
 		return
 	}
