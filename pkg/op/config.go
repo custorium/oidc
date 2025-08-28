@@ -54,6 +54,9 @@ type Configuration interface {
 
 	BackChannelLogoutSupported() bool
 	BackChannelLogoutSessionSupported() bool
+
+	//ATProto
+	PushedAuthorizationRequestEndpoint() *Endpoint
 }
 
 type IssuerFromRequest func(r *http.Request) string

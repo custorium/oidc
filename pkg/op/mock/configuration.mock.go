@@ -73,6 +73,14 @@ func (m *MockConfiguration) AuthorizationEndpoint() *op.Endpoint {
 }
 
 // AuthorizationEndpoint mocks base method.
+func (m *MockConfiguration) PushedAuthorizationRequestEndpoint() *op.Endpoint {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PushedAuthorizationRequestEndpoint")
+	ret0, _ := ret[0].(*op.Endpoint)
+	return ret0
+}
+
+// AuthorizationEndpoint mocks base method.
 func (m *MockConfiguration) DiscoveryEndpoint() *op.Endpoint {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DiscoveryEndpoint")
@@ -84,6 +92,12 @@ func (m *MockConfiguration) DiscoveryEndpoint() *op.Endpoint {
 func (mr *MockConfigurationMockRecorder) AuthorizationEndpoint() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizationEndpoint", reflect.TypeOf((*MockConfiguration)(nil).AuthorizationEndpoint))
+}
+
+// PushedAuthorizationRequestEndpoint indicates an expected call of AuthorizationEndpoint.
+func (mr *MockConfigurationMockRecorder) PushedAuthorizationRequestEndpoint() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PushedAuthorizationRequestEndpoint", reflect.TypeOf((*MockConfiguration)(nil).AuthorizationEndpoint))
 }
 
 // AuthorizationEndpoint indicates an expected call of AuthorizationEndpoint.

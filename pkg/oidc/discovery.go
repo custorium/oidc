@@ -154,7 +154,7 @@ type DiscoveryConfiguration struct {
 	// If supported, the sid Claim is also included in ID Tokens issued by the OP. If omitted, the default value is false.
 	BackChannelLogoutSessionSupported bool `json:"backchannel_logout_session_supported,omitempty"`
 
-	//Needed for ATProto
+	// Needed for ATProto
 	// https://www.ietf.org/archive/id/draft-meyerzuselhausen-oauth-iss-auth-resp-02.html
 	// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-dpop-11
 	// https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/

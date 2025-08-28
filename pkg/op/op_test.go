@@ -154,7 +154,7 @@ func TestRoutes(t *testing.T) {
 			method:   http.MethodGet,
 			path:     testProvider.DiscoveryEndpoint().Relative(),
 			wantCode: http.StatusOK,
-			json:     `{"issuer":"https://localhost:9998/","authorization_endpoint":"https://localhost:9998/authorize","token_endpoint":"https://localhost:9998/oauth/token","introspection_endpoint":"https://localhost:9998/oauth/introspect","userinfo_endpoint":"https://localhost:9998/userinfo","revocation_endpoint":"https://localhost:9998/revoke","end_session_endpoint":"https://localhost:9998/end_session","device_authorization_endpoint":"https://localhost:9998/device_authorization","jwks_uri":"https://localhost:9998/keys","scopes_supported":["openid","profile","email","phone","address","offline_access"],"response_types_supported":["code","id_token","id_token token"],"response_modes_supported":["form_post","fragment","query"],"grant_types_supported":["authorization_code","implicit","refresh_token","client_credentials","urn:ietf:params:oauth:grant-type:token-exchange","urn:ietf:params:oauth:grant-type:jwt-bearer","urn:ietf:params:oauth:grant-type:device_code"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256"],"request_object_signing_alg_values_supported":["RS256"],"token_endpoint_auth_methods_supported":["none","client_secret_basic","client_secret_post","private_key_jwt"],"token_endpoint_auth_signing_alg_values_supported":["RS256"],"revocation_endpoint_auth_methods_supported":["none","client_secret_basic","client_secret_post","private_key_jwt"],"revocation_endpoint_auth_signing_alg_values_supported":["RS256"],"introspection_endpoint_auth_methods_supported":["client_secret_basic","private_key_jwt"],"introspection_endpoint_auth_signing_alg_values_supported":["RS256"],"claims_supported":["sub","aud","exp","iat","iss","auth_time","nonce","acr","amr","c_hash","at_hash","act","scopes","client_id","azp","preferred_username","name","family_name","given_name","locale","email","email_verified","phone_number","phone_number_verified"],"code_challenge_methods_supported":["S256"],"ui_locales_supported":["en"],"request_parameter_supported":true,"request_uri_parameter_supported":false}`,
+			json:     `{"issuer":"https://localhost:9998/","authorization_endpoint":"https://localhost:9998/authorize","pushed_authorization_request_endpoint":"https://localhost:9998/par","token_endpoint":"https://localhost:9998/oauth/token","introspection_endpoint":"https://localhost:9998/oauth/introspect","userinfo_endpoint":"https://localhost:9998/userinfo","revocation_endpoint":"https://localhost:9998/revoke","end_session_endpoint":"https://localhost:9998/end_session","device_authorization_endpoint":"https://localhost:9998/device_authorization","jwks_uri":"https://localhost:9998/keys","scopes_supported":["openid","profile","email","phone","address","offline_access"],"response_types_supported":["code","id_token","id_token token"],"response_modes_supported":["form_post","fragment","query"],"grant_types_supported":["authorization_code","implicit","refresh_token","client_credentials","urn:ietf:params:oauth:grant-type:token-exchange","urn:ietf:params:oauth:grant-type:jwt-bearer","urn:ietf:params:oauth:grant-type:device_code"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256"],"request_object_signing_alg_values_supported":["RS256"],"token_endpoint_auth_methods_supported":["none","client_secret_basic","client_secret_post","private_key_jwt"],"token_endpoint_auth_signing_alg_values_supported":["RS256"],"revocation_endpoint_auth_methods_supported":["none","client_secret_basic","client_secret_post","private_key_jwt"],"revocation_endpoint_auth_signing_alg_values_supported":["RS256"],"introspection_endpoint_auth_methods_supported":["client_secret_basic","private_key_jwt"],"introspection_endpoint_auth_signing_alg_values_supported":["RS256"],"claims_supported":["sub","aud","exp","iat","iss","auth_time","nonce","acr","amr","c_hash","at_hash","act","scopes","client_id","azp","preferred_username","name","family_name","given_name","locale","email","email_verified","phone_number","phone_number_verified"],"code_challenge_methods_supported":["S256"],"ui_locales_supported":["en"],"request_parameter_supported":true,"request_uri_parameter_supported":false}`,
 		},
 		{
 			name:   "authorization",
@@ -406,6 +406,7 @@ func TestRoutes(t *testing.T) {
 func TestWithCustomEndpoints(t *testing.T) {
 	type args struct {
 		auth       *op.Endpoint
+		par        *op.Endpoint
 		token      *op.Endpoint
 		userInfo   *op.Endpoint
 		revocation *op.Endpoint
@@ -426,6 +427,7 @@ func TestWithCustomEndpoints(t *testing.T) {
 			name: "all set",
 			args: args{
 				auth:       op.NewEndpoint("/authorize"),
+				par:        op.NewEndpoint("/par"),
 				token:      op.NewEndpoint("/oauth/token"),
 				userInfo:   op.NewEndpoint("/userinfo"),
 				revocation: op.NewEndpoint("/revoke"),
@@ -438,7 +440,7 @@ func TestWithCustomEndpoints(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := op.NewOpenIDProvider(testIssuer, testConfig,
 				storage.NewStorage(storage.NewUserStore(testIssuer)),
-				op.WithCustomEndpoints(tt.args.auth, tt.args.token, tt.args.userInfo, tt.args.revocation, tt.args.endSession, tt.args.keys),
+				op.WithCustomEndpoints(tt.args.auth, tt.args.par, tt.args.token, tt.args.userInfo, tt.args.revocation, tt.args.endSession, tt.args.keys),
 			)
 			require.ErrorIs(t, err, tt.wantErr)
 			if tt.wantErr != nil {

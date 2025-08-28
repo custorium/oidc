@@ -19,31 +19,33 @@ import (
 )
 
 const (
-	healthEndpoint               = "/healthz"
-	readinessEndpoint            = "/ready"
-	authCallbackPathSuffix       = "/callback"
-	defaultAuthorizationEndpoint = "authorize"
-	defaultDiscoveryEndpoint     = ".well-known/openid-configuration"
-	defaultTokenEndpoint         = "oauth/token"
-	defaultIntrospectEndpoint    = "oauth/introspect"
-	defaultUserinfoEndpoint      = "userinfo"
-	defaultRevocationEndpoint    = "revoke"
-	defaultEndSessionEndpoint    = "end_session"
-	defaultKeysEndpoint          = "keys"
-	defaultDeviceAuthzEndpoint   = "/device_authorization"
+	healthEndpoint                     = "/healthz"
+	readinessEndpoint                  = "/ready"
+	authCallbackPathSuffix             = "/callback"
+	defaultAuthorizationEndpoint       = "authorize"
+	defaultPushedAuthorizationEndpoint = "par"
+	defaultDiscoveryEndpoint           = ".well-known/openid-configuration"
+	defaultTokenEndpoint               = "oauth/token"
+	defaultIntrospectEndpoint          = "oauth/introspect"
+	defaultUserinfoEndpoint            = "userinfo"
+	defaultRevocationEndpoint          = "revoke"
+	defaultEndSessionEndpoint          = "end_session"
+	defaultKeysEndpoint                = "keys"
+	defaultDeviceAuthzEndpoint         = "/device_authorization"
 )
 
 var (
 	DefaultEndpoints = &Endpoints{
-		Authorization:       NewEndpoint(defaultAuthorizationEndpoint),
-		Discovery:           NewEndpoint(defaultDiscoveryEndpoint),
-		Token:               NewEndpoint(defaultTokenEndpoint),
-		Introspection:       NewEndpoint(defaultIntrospectEndpoint),
-		Userinfo:            NewEndpoint(defaultUserinfoEndpoint),
-		Revocation:          NewEndpoint(defaultRevocationEndpoint),
-		EndSession:          NewEndpoint(defaultEndSessionEndpoint),
-		JwksURI:             NewEndpoint(defaultKeysEndpoint),
-		DeviceAuthorization: NewEndpoint(defaultDeviceAuthzEndpoint),
+		Authorization:              NewEndpoint(defaultAuthorizationEndpoint),
+		PushedAuthorizationRequest: NewEndpoint(defaultPushedAuthorizationEndpoint),
+		Discovery:                  NewEndpoint(defaultDiscoveryEndpoint),
+		Token:                      NewEndpoint(defaultTokenEndpoint),
+		Introspection:              NewEndpoint(defaultIntrospectEndpoint),
+		Userinfo:                   NewEndpoint(defaultUserinfoEndpoint),
+		Revocation:                 NewEndpoint(defaultRevocationEndpoint),
+		EndSession:                 NewEndpoint(defaultEndSessionEndpoint),
+		JwksURI:                    NewEndpoint(defaultKeysEndpoint),
+		DeviceAuthorization:        NewEndpoint(defaultDeviceAuthzEndpoint),
 	}
 
 	DefaultSupportedClaims = []string{
@@ -137,6 +139,7 @@ func CreateRouter(o OpenIDProvider, interceptors ...HttpInterceptor) chi.Router 
 	router.HandleFunc(readinessEndpoint, readyHandler(o.Probes()))
 	router.HandleFunc(o.DiscoveryEndpoint().Relative(), discoveryHandler(o, o.Storage()))
 	router.HandleFunc(o.AuthorizationEndpoint().Relative(), authorizeHandler(o))
+	router.HandleFunc(o.PushedAuthorizationRequestEndpoint().Relative(), pushedAuthorizeHandler(o))
 	router.HandleFunc(authCallbackPath(o), AuthorizeCallbackHandler(o))
 	router.HandleFunc(o.TokenEndpoint().Relative(), tokenHandler(o))
 	router.HandleFunc(o.IntrospectionEndpoint().Relative(), introspectionHandler(o))
@@ -177,16 +180,17 @@ type Config struct {
 
 // Endpoints defines endpoint routes.
 type Endpoints struct {
-	Authorization       *Endpoint
-	Token               *Endpoint
-	Introspection       *Endpoint
-	Userinfo            *Endpoint
-	Revocation          *Endpoint
-	EndSession          *Endpoint
-	CheckSessionIframe  *Endpoint
-	JwksURI             *Endpoint
-	DeviceAuthorization *Endpoint
-	Discovery           *Endpoint
+	Authorization              *Endpoint
+	PushedAuthorizationRequest *Endpoint
+	Token                      *Endpoint
+	Introspection              *Endpoint
+	Userinfo                   *Endpoint
+	Revocation                 *Endpoint
+	EndSession                 *Endpoint
+	CheckSessionIframe         *Endpoint
+	JwksURI                    *Endpoint
+	DeviceAuthorization        *Endpoint
+	Discovery                  *Endpoint
 }
 
 // NewOpenIDProvider creates a provider. The provider provides (with HttpHandler())
@@ -316,6 +320,10 @@ func (o *Provider) Insecure() bool {
 
 func (o *Provider) AuthorizationEndpoint() *Endpoint {
 	return o.endpoints.Authorization
+}
+
+func (o *Provider) PushedAuthorizationRequestEndpoint() *Endpoint {
+	return o.endpoints.PushedAuthorizationRequest
 }
 
 func (o *Provider) DiscoveryEndpoint() *Endpoint {
@@ -528,6 +536,16 @@ func WithCustomAuthEndpoint(endpoint *Endpoint) Option {
 	}
 }
 
+func WithCustomParEndpoint(endpoint *Endpoint) Option {
+	return func(o *Provider) error {
+		if err := endpoint.Validate(); err != nil {
+			return err
+		}
+		o.endpoints.PushedAuthorizationRequest = endpoint
+		return nil
+	}
+}
+
 func WithCustomDiscoveryEndpoint(endpoint *Endpoint) Option {
 	return func(o *Provider) error {
 		if err := endpoint.Validate(); err != nil {
@@ -611,14 +629,15 @@ func WithCustomDeviceAuthorizationEndpoint(endpoint *Endpoint) Option {
 // WithCustomEndpoints sets multiple endpoints at once.
 // Non of the endpoints may be nil, or an error will
 // be returned when the Option used by the Provider.
-func WithCustomEndpoints(auth, token, userInfo, revocation, endSession, keys *Endpoint) Option {
+func WithCustomEndpoints(auth, par, token, userInfo, revocation, endSession, keys *Endpoint) Option {
 	return func(o *Provider) error {
-		for _, e := range []*Endpoint{auth, token, userInfo, revocation, endSession, keys} {
+		for _, e := range []*Endpoint{auth, par, token, userInfo, revocation, endSession, keys} {
 			if err := e.Validate(); err != nil {
 				return err
 			}
 		}
 		o.endpoints.Authorization = auth
+		o.endpoints.PushedAuthorizationRequest = par
 		o.endpoints.Token = token
 		o.endpoints.Userinfo = userInfo
 		o.endpoints.Revocation = revocation

@@ -89,6 +89,7 @@ type AuthRequest struct {
 
 	// RequestParam enables OIDC requests to be passed in a single, self-contained parameter (as JWT, called Request Object)
 	RequestParam string `schema:"request"`
+	RequestUri   string `json:"request_uri" schema:"request_uri"`
 }
 
 func (a *AuthRequest) LogValue() slog.Value {

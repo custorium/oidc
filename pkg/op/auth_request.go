@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -75,38 +76,37 @@ func authorizeHandler(authorizer Authorizer) func(http.ResponseWriter, *http.Req
 	}
 }
 
+func pushedAuthorizeHandler(authorizer Authorizer) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		PushedAuthorize(w, r, authorizer)
+	}
+}
+
 func AuthorizeCallbackHandler(authorizer Authorizer) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		AuthorizeCallback(w, r, authorizer)
 	}
 }
 
+type PushedAuthorizeResponse struct {
+	RequestUri string `json:"request_uri"`
+	ExpiresIn  int    `json:"expires_in"`
+}
+
 // Authorize handles the authorization request, including
 // parsing, validating, storing and finally redirecting to the login handler
-func Authorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
-	ctx, span := tracer.Start(r.Context(), "Authorize")
-	r = r.WithContext(ctx)
-	defer span.End()
-
-	authReq, err := ParseAuthorizeRequest(r, authorizer.Decoder())
-	if err != nil {
-		AuthRequestError(w, r, nil, err, authorizer)
-		return
-	}
+func validateAuthrequest(ctx context.Context, authReq *oidc.AuthRequest, authorizer Authorizer) (AuthRequest, Client, error) {
 	if authReq.RequestParam != "" && authorizer.RequestObjectSupported() {
-		err = ParseRequestObject(ctx, authReq, authorizer.Storage(), IssuerFromContext(ctx))
+		err := ParseRequestObject(ctx, authReq, authorizer.Storage(), IssuerFromContext(ctx))
 		if err != nil {
-			AuthRequestError(w, r, nil, err, authorizer)
-			return
+			return nil, nil, err
 		}
 	}
 	if authReq.ClientID == "" {
-		AuthRequestError(w, r, nil, fmt.Errorf("auth request is missing client_id"), authorizer)
-		return
+		return nil, nil, fmt.Errorf("auth request is missing client_id")
 	}
 	if authReq.RedirectURI == "" {
-		AuthRequestError(w, r, nil, fmt.Errorf("auth request is missing redirect_uri"), authorizer)
-		return
+		return nil, nil, fmt.Errorf("auth request is missing redirect_uri")
 	}
 
 	var client Client
@@ -122,18 +122,52 @@ func Authorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
 	}
 	userID, err := validation(ctx, authReq, authorizer.Storage(), authorizer.IDTokenHintVerifier(ctx))
 	if err != nil {
-		AuthRequestError(w, r, authReq, err, authorizer)
-		return
+		return nil, nil, err
 	}
 	if authReq.RequestParam != "" {
-		AuthRequestError(w, r, authReq, oidc.ErrRequestNotSupported(), authorizer)
-		return
+		return nil, nil, oidc.ErrRequestNotSupported()
 	}
 	req, err := authorizer.Storage().CreateAuthRequest(ctx, authReq, userID)
 	if err != nil {
-		AuthRequestError(w, r, authReq, oidc.DefaultToServerError(err, "unable to save auth request"), authorizer)
+		return nil, nil, oidc.DefaultToServerError(err, "unable to save auth request")
+	}
+	return req, client, nil
+}
+
+// Authorize handles the authorization request, including
+// parsing, validating, storing and finally redirecting to the login handler
+func Authorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
+	ctx, span := tracer.Start(r.Context(), "Authorize")
+	r = r.WithContext(ctx)
+	defer span.End()
+
+	authReq, err := ParseAuthorizeRequest(r, authorizer.Decoder())
+	if err != nil {
+		AuthRequestError(w, r, nil, err, authorizer)
 		return
 	}
+
+	var req AuthRequest
+	var client Client
+	if authReq.RequestUri != "" {
+		req, err = authorizer.Storage().AuthRequestByID(ctx, authReq.RedirectURI)
+		if err != nil {
+			AuthRequestError(w, r, authReq, err, authorizer)
+			return
+		}
+		client, err = authorizer.Storage().GetClientByClientID(ctx, authReq.ClientID)
+		if err != nil {
+			AuthRequestError(w, r, authReq, errors.New("unable to retrieve client by id"), authorizer)
+			return
+		}
+	} else {
+		req, client, err = validateAuthrequest(ctx, authReq, authorizer)
+		if err != nil {
+			AuthRequestError(w, r, authReq, err, authorizer)
+			return
+		}
+	}
+
 	RedirectToLogin(req.GetID(), client, w, r)
 }
 
@@ -149,6 +183,36 @@ func ParseAuthorizeRequest(r *http.Request, decoder httphelper.Decoder) (*oidc.A
 		return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse auth request").WithParent(err)
 	}
 	return authReq, nil
+}
+
+// Authorize handles the authorization request, including
+// parsing, validating, storing and finally redirecting to the login handler
+func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
+	ctx, span := tracer.Start(r.Context(), "PushedAuthorize")
+	r = r.WithContext(ctx)
+	defer span.End()
+
+	authReq, err := ParseAuthorizeRequest(r, authorizer.Decoder())
+	if err != nil {
+		RequestError(w, r, err, authorizer.Logger())
+		return
+	}
+
+	if authReq.RedirectURI == "" {
+		RequestError(w, r, fmt.Errorf("request_uri not accepted on par endpoint"), authorizer.Logger())
+	}
+
+	req, _, err := validateAuthrequest(ctx, authReq, authorizer)
+	if err != nil {
+		RequestError(w, r, err, authorizer.Logger())
+		return
+	}
+
+	response := PushedAuthorizeResponse{
+		RequestUri: req.GetID(),
+		ExpiresIn:  90,
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 // ParseRequestObject parse the `request` parameter, validates the token including the signature
