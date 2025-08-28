@@ -150,9 +150,13 @@ func Authorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
 	var req AuthRequest
 	var client Client
 	if authReq.RequestUri != "" {
-		req, err = authorizer.Storage().AuthRequestByID(ctx, authReq.RedirectURI)
+		req, err = authorizer.Storage().AuthRequestByID(ctx, authReq.RequestUri)
 		if err != nil {
 			AuthRequestError(w, r, authReq, err, authorizer)
+			return
+		}
+		if req.GetClientID() != authReq.ClientID {
+			AuthRequestError(w, r, authReq, errors.New("client id not valid"), authorizer)
 			return
 		}
 		client, err = authorizer.Storage().GetClientByClientID(ctx, authReq.ClientID)
