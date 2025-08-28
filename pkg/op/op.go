@@ -405,7 +405,7 @@ func (o *Provider) IntrospectionAuthMethodPrivateKeyJWTSupported() bool {
 }
 
 func (o *Provider) IntrospectionEndpointSigningAlgorithmsSupported() []string {
-	return []string{"RS256"}
+	return []string{"ES256"}
 }
 
 func (o *Provider) GrantTypeClientCredentialsSupported() bool {
@@ -418,7 +418,7 @@ func (o *Provider) RevocationAuthMethodPrivateKeyJWTSupported() bool {
 }
 
 func (o *Provider) RevocationEndpointSigningAlgorithmsSupported() []string {
-	return []string{"RS256"}
+	return []string{"ES256"}
 }
 
 func (o *Provider) RequestObjectSupported() bool {
@@ -426,7 +426,7 @@ func (o *Provider) RequestObjectSupported() bool {
 }
 
 func (o *Provider) RequestObjectSigningAlgorithmsSupported() []string {
-	return []string{"RS256"}
+	return []string{"ES256"}
 }
 
 func (o *Provider) SupportedUILocales() []language.Tag {
