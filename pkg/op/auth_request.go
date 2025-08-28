@@ -225,8 +225,7 @@ func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authoriz
 		RequestUri: req.GetID(),
 		ExpiresIn:  90,
 	}
-	w.Header().Set("content-type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	MarshalJSONWithStatus(w, response, 200)
 }
 
 // ParseRequestObject parse the `request` parameter, validates the token including the signature
