@@ -156,6 +156,10 @@ func (m *MockConfiguration) CodeMethodS256Supported() bool {
 	return ret0
 }
 
+func (m *MockConfiguration) RequirePushedAuthorizationRequests() bool {
+	return false
+}
+
 // CodeMethodS256Supported indicates an expected call of CodeMethodS256Supported.
 func (mr *MockConfigurationMockRecorder) CodeMethodS256Supported() *gomock.Call {
 	mr.mock.ctrl.T.Helper()

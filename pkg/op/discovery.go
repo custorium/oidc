@@ -67,6 +67,7 @@ func CreateDiscoveryConfig(ctx context.Context, config Configuration, storage Di
 		BackChannelLogoutSessionSupported:                  config.BackChannelLogoutSessionSupported(),
 		// ATProto
 		PushedAuthorizationRequestEndpoint: config.PushedAuthorizationRequestEndpoint().Absolute(issuer),
+		RequirePushedAuthorizationRequests: config.RequirePushedAuthorizationRequests(),
 	}
 }
 

@@ -57,6 +57,7 @@ type Configuration interface {
 
 	//ATProto
 	PushedAuthorizationRequestEndpoint() *Endpoint
+	RequirePushedAuthorizationRequests() bool
 }
 
 type IssuerFromRequest func(r *http.Request) string

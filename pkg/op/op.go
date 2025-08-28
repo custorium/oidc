@@ -163,19 +163,20 @@ func authCallbackPath(o OpenIDProvider) string {
 }
 
 type Config struct {
-	CryptoKey                         [32]byte // for encrypting access token via NewAESCrypto; will be overwritten by WithCrypto
-	DefaultLogoutRedirectURI          string
-	CodeMethodS256                    bool
-	AuthMethodPost                    bool
-	AuthMethodPrivateKeyJWT           bool
-	GrantTypeRefreshToken             bool
-	RequestObjectSupported            bool
-	SupportedUILocales                []language.Tag
-	SupportedClaims                   []string
-	SupportedScopes                   []string
-	DeviceAuthorization               DeviceAuthorizationConfig
-	BackChannelLogoutSupported        bool
-	BackChannelLogoutSessionSupported bool
+	CryptoKey                          [32]byte // for encrypting access token via NewAESCrypto; will be overwritten by WithCrypto
+	DefaultLogoutRedirectURI           string
+	CodeMethodS256                     bool
+	AuthMethodPost                     bool
+	AuthMethodPrivateKeyJWT            bool
+	GrantTypeRefreshToken              bool
+	RequestObjectSupported             bool
+	SupportedUILocales                 []language.Tag
+	SupportedClaims                    []string
+	SupportedScopes                    []string
+	DeviceAuthorization                DeviceAuthorizationConfig
+	BackChannelLogoutSupported         bool
+	BackChannelLogoutSessionSupported  bool
+	RequirePushedAuthorizationRequests bool
 }
 
 // Endpoints defines endpoint routes.
@@ -356,6 +357,10 @@ func (o *Provider) EndSessionEndpoint() *Endpoint {
 
 func (o *Provider) DeviceAuthorizationEndpoint() *Endpoint {
 	return o.endpoints.DeviceAuthorization
+}
+
+func (o *Provider) RequirePushedAuthorizationRequests() bool {
+	return o.config.RequirePushedAuthorizationRequests
 }
 
 func (o *Provider) CheckSessionIframe() *Endpoint {
