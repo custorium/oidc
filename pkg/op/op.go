@@ -379,7 +379,7 @@ func (o *Provider) AuthMethodPrivateKeyJWTSupported() bool {
 }
 
 func (o *Provider) TokenEndpointSigningAlgorithmsSupported() []string {
-	return []string{"RS256"}
+	return []string{"ES256"}
 }
 
 func (o *Provider) GrantTypeRefreshTokenSupported() bool {
