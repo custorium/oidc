@@ -173,16 +173,28 @@ func Authorize(w http.ResponseWriter, r *http.Request, authorizer Authorizer) {
 
 // ParseAuthorizeRequest parsed the http request into an oidc.AuthRequest
 func ParseAuthorizeRequest(r *http.Request, decoder httphelper.Decoder) (*oidc.AuthRequest, error) {
-	err := r.ParseForm()
-	if err != nil {
-		return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse form").WithParent(err)
+
+	ct := r.Header["Content-Type"]
+	if len(ct) > 0 && ct[0] == "application/json" {
+		decode := json.NewDecoder(r.Body)
+		authReq := oidc.AuthRequest{}
+		err := decode.Decode(&authReq)
+		if err != nil {
+			return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse json").WithParent(err)
+		}
+		return &authReq, nil
+	} else {
+		err := r.ParseForm()
+		if err != nil {
+			return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse form").WithParent(err)
+		}
+		authReq := new(oidc.AuthRequest)
+		err = decoder.Decode(authReq, r.Form)
+		if err != nil {
+			return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse auth request").WithParent(err)
+		}
+		return authReq, nil
 	}
-	authReq := new(oidc.AuthRequest)
-	err = decoder.Decode(authReq, r.Form)
-	if err != nil {
-		return nil, oidc.ErrInvalidRequest().WithDescription("cannot parse auth request").WithParent(err)
-	}
-	return authReq, nil
 }
 
 // Authorize handles the authorization request, including
@@ -200,6 +212,7 @@ func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authoriz
 
 	if authReq.RedirectURI != "" {
 		RequestError(w, r, fmt.Errorf("request_uri not accepted on par endpoint"), authorizer.Logger())
+		return
 	}
 
 	req, _, err := validateAuthrequest(ctx, authReq, authorizer)
