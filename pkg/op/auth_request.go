@@ -68,6 +68,7 @@ type CodeResponseType struct {
 	Code         string `schema:"code"`
 	State        string `schema:"state,omitempty"`
 	SessionState string `schema:"session_state,omitempty"`
+	Iss          string `schema:"iss,omitempty"`
 }
 
 func authorizeHandler(authorizer Authorizer) func(http.ResponseWriter, *http.Request) {
@@ -619,6 +620,7 @@ func BuildAuthResponseCodeResponsePayload(ctx context.Context, authReq AuthReque
 		Code:         code,
 		State:        authReq.GetState(),
 		SessionState: sessionState,
+		Iss:          IssuerFromContext(ctx),
 	}, nil
 }
 

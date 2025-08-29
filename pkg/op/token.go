@@ -75,7 +75,6 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 		State:        state,
 		Scope:        request.GetScopes(),
 		Sub:          request.GetSubject(),
-		Iss:          IssuerFromContext(ctx),
 	}, nil
 }
 
