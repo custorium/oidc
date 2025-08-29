@@ -163,20 +163,21 @@ func authCallbackPath(o OpenIDProvider) string {
 }
 
 type Config struct {
-	CryptoKey                          [32]byte // for encrypting access token via NewAESCrypto; will be overwritten by WithCrypto
-	DefaultLogoutRedirectURI           string
-	CodeMethodS256                     bool
-	AuthMethodPost                     bool
-	AuthMethodPrivateKeyJWT            bool
-	GrantTypeRefreshToken              bool
-	RequestObjectSupported             bool
-	SupportedUILocales                 []language.Tag
-	SupportedClaims                    []string
-	SupportedScopes                    []string
-	DeviceAuthorization                DeviceAuthorizationConfig
-	BackChannelLogoutSupported         bool
-	BackChannelLogoutSessionSupported  bool
-	RequirePushedAuthorizationRequests bool
+	CryptoKey                                  [32]byte // for encrypting access token via NewAESCrypto; will be overwritten by WithCrypto
+	DefaultLogoutRedirectURI                   string
+	CodeMethodS256                             bool
+	AuthMethodPost                             bool
+	AuthMethodPrivateKeyJWT                    bool
+	GrantTypeRefreshToken                      bool
+	RequestObjectSupported                     bool
+	SupportedUILocales                         []language.Tag
+	SupportedClaims                            []string
+	SupportedScopes                            []string
+	DeviceAuthorization                        DeviceAuthorizationConfig
+	BackChannelLogoutSupported                 bool
+	BackChannelLogoutSessionSupported          bool
+	RequirePushedAuthorizationRequests         bool
+	AuthorizationResponseIssParameterSupported bool
 }
 
 // Endpoints defines endpoint routes.
@@ -361,6 +362,10 @@ func (o *Provider) DeviceAuthorizationEndpoint() *Endpoint {
 
 func (o *Provider) RequirePushedAuthorizationRequests() bool {
 	return o.config.RequirePushedAuthorizationRequests
+}
+
+func (o *Provider) AuthorizationResponseIssParameterSupported() bool {
+	return o.config.AuthorizationResponseIssParameterSupported
 }
 
 func (o *Provider) CheckSessionIframe() *Endpoint {

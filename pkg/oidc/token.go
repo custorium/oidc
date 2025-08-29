@@ -238,6 +238,7 @@ type AccessTokenResponse struct {
 	State        string              `json:"state,omitempty" schema:"state,omitempty"`
 	Scope        SpaceDelimitedArray `json:"scope,omitempty" schema:"scope,omitempty"`
 	Sub          string              `json:"sub,omitempty" schema:"sub,omitempty"` // ATProto specific
+	Iss          string              `json:"iss,omitempty" schema:"iss,omitempty"` // ATProto specific
 }
 
 type JWTProfileAssertionClaims struct {
