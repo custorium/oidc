@@ -81,7 +81,7 @@ type AuthRequest struct {
 	MaxAge       *uint               `json:"max_age" schema:"max_age"`
 	UILocales    Locales             `json:"ui_locales" schema:"ui_locales"`
 	IDTokenHint  string              `json:"id_token_hint" schema:"id_token_hint"`
-	LoginHint    string              `json:"login_hint" schema:"login_hint"`
+	LoginHint    *string             `json:"login_hint" schema:"login_hint"`
 	ACRValues    SpaceDelimitedArray `json:"acr_values" schema:"acr_values"`
 
 	CodeChallenge       string              `json:"code_challenge" schema:"code_challenge"`

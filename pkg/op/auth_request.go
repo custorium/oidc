@@ -36,8 +36,8 @@ type AuthRequest interface {
 	GetScopes() []string
 	GetState() string
 	GetSubject() string
-	GetLoginHint() string
-	Done() bool
+	GetLoginHint() *string
+	GetDone() bool
 }
 
 // AuthRequestSessionState should be implemented if [OpenID Connect Session Management](https://openid.net/specs/openid-connect-session-1_0.html) is supported
@@ -295,7 +295,7 @@ func CopyRequestObjectToAuthRequest(authReq *oidc.AuthRequest, requestObject *oi
 	if requestObject.IDTokenHint != "" {
 		authReq.IDTokenHint = requestObject.IDTokenHint
 	}
-	if requestObject.LoginHint != "" {
+	if requestObject.LoginHint != nil {
 		authReq.LoginHint = requestObject.LoginHint
 	}
 	if len(requestObject.ACRValues) > 0 {
@@ -529,7 +529,7 @@ func AuthorizeCallback(w http.ResponseWriter, r *http.Request, authorizer Author
 		AuthRequestError(w, r, nil, err, authorizer)
 		return
 	}
-	if !authReq.Done() {
+	if !authReq.GetDone() {
 		AuthRequestError(w, r, authReq,
 			oidc.ErrInteractionRequired().WithDescription("Unfortunately, the user may be not logged in and/or additional interaction is required."),
 			authorizer)

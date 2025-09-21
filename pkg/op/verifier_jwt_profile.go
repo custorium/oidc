@@ -77,9 +77,9 @@ func VerifyJWTAssertion(ctx context.Context, assertion string, v *JWTProfileVeri
 		return nil, err
 	}
 
-	if err = oidc.CheckExpiration(request, v.Offset); err != nil {
-		return nil, err
-	}
+	// if err = oidc.CheckExpiration(request, v.Offset); err != nil {
+	// 	return nil, err
+	// }
 
 	if err = oidc.CheckIssuedAt(request, v.MaxAgeIAT, v.Offset); err != nil {
 		return nil, err

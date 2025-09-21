@@ -184,7 +184,7 @@ func TestWrongHeaderType(t *testing.T) {
 func TestWrongMethod(t *testing.T) {
 	rr := httptest.NewRecorder()
 
-	req := getRequest(t, "http://test.com/test", "post")
+	req := getRequest(t, "http://test.com/test?q=1", "post")
 
 	req.Header.Set(DPoPHeaderKey, createDPoPHeader("http://test.com/test", "get", dPopJwtHeaderType, time.Now(), "", false, true))
 
@@ -193,6 +193,20 @@ func TestWrongMethod(t *testing.T) {
 	DPoPInterceptor(handler).ServeHTTP(rr, req)
 
 	checkResult(t, rr, dPopError, wrongMethodOrUri, http.StatusBadRequest)
+}
+
+func TestWrongMethodQuery(t *testing.T) {
+	rr := httptest.NewRecorder()
+
+	req := getRequest(t, "http://test.com/test?q=1", "get")
+
+	req.Header.Set(DPoPHeaderKey, createDPoPHeader("http://test.com/test", "get", dPopJwtHeaderType, time.Now(), "", false, true))
+
+	handler := http.HandlerFunc(finalHandler)
+
+	DPoPInterceptor(handler).ServeHTTP(rr, req)
+
+	checkResult(t, rr, dPopError, wrongMethodOrUri, http.StatusOK)
 }
 
 func TestWrongUri(t *testing.T) {

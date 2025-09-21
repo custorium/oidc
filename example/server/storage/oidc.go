@@ -30,7 +30,7 @@ type AuthRequest struct {
 	TransferState string
 	Prompt        []string
 	UiLocales     []language.Tag
-	LoginHint     string
+	LoginHint     *string
 	MaxAuthAge    *time.Duration
 	UserID        string
 	Scopes        []string
@@ -108,7 +108,7 @@ func (a *AuthRequest) GetScopes() []string {
 	return a.Scopes
 }
 
-func (a *AuthRequest) GetLoginHint() string {
+func (a *AuthRequest) GetLoginHint() *string {
 	return a.LoginHint
 }
 
@@ -120,7 +120,7 @@ func (a *AuthRequest) GetSubject() string {
 	return a.UserID
 }
 
-func (a *AuthRequest) Done() bool {
+func (a *AuthRequest) GetDone() bool {
 	return a.done
 }
 

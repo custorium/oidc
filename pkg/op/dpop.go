@@ -94,7 +94,7 @@ func isValidMethodAndUri(payload *dPopPayload, r *http.Request) bool {
 		host = fh
 	}
 
-	requestUri := fmt.Sprintf("%s://%s%s", proto, host, r.RequestURI)
+	requestUri := fmt.Sprintf("%s://%s%s", proto, host, r.URL.Path)
 	if !strings.EqualFold(payload.HttpUri, requestUri) {
 		log.Println(payload.HttpUri)
 		log.Println(requestUri)
