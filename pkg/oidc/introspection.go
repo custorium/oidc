@@ -7,8 +7,8 @@ type IntrospectionRequest struct {
 }
 
 type ClientAssertionParams struct {
-	ClientAssertion     string `schema:"client_assertion"`
-	ClientAssertionType string `schema:"client_assertion_type"`
+	ClientAssertion     string `schema:"client_assertion" json:"client_assertion"`
+	ClientAssertionType string `schema:"client_assertion_type" json:"client_assertion_type"`
 }
 
 // IntrospectionResponse implements RFC 7662, section 2.2 and

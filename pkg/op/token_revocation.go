@@ -2,7 +2,9 @@ package op
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -76,20 +78,34 @@ func ParseTokenRevocationRequest(r *http.Request, revoker Revoker) (token, token
 	r = r.WithContext(ctx)
 	defer span.End()
 
-	err = r.ParseForm()
-	if err != nil {
-		return "", "", "", oidc.ErrInvalidRequest().WithDescription("unable to parse request").WithParent(err)
-	}
 	req := new(struct {
 		oidc.RevocationRequest
 		oidc.ClientAssertionParams        // for auth_method private_key_jwt
-		ClientID                   string `schema:"client_id"`     // for auth_method none and post
-		ClientSecret               string `schema:"client_secret"` // for auth_method post
+		ClientID                   string `schema:"client_id" json:"client_id"`         // for auth_method none and post
+		ClientSecret               string `schema:"client_secret" json:"client_secret"` // for auth_method post
 	})
-	err = revoker.Decoder().Decode(req, r.Form)
-	if err != nil {
-		return "", "", "", oidc.ErrInvalidRequest().WithDescription("error decoding form").WithParent(err)
+
+	ct := r.Header["Content-Type"]
+	if len(ct) == 1 && ct[0] == "application/json" {
+		defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			return "", "", "", oidc.ErrInvalidRequest().WithDescription("unable to parse request").WithParent(err)
+		}
+		if json.Unmarshal(body, &req) != nil {
+			return "", "", "", oidc.ErrInvalidRequest().WithDescription("unable to parse request").WithParent(err)
+		}
+	} else {
+		err = r.ParseForm()
+		if err != nil {
+			return "", "", "", oidc.ErrInvalidRequest().WithDescription("unable to parse request").WithParent(err)
+		}
+		err = revoker.Decoder().Decode(req, r.Form)
+		if err != nil {
+			return "", "", "", oidc.ErrInvalidRequest().WithDescription("error decoding form").WithParent(err)
+		}
 	}
+
 	if req.ClientAssertionType == oidc.ClientAssertionTypeJWTAssertion {
 		revokerJWTProfile, ok := revoker.(RevokerJWTProfile)
 		if !ok || !revoker.AuthMethodPrivateKeyJWTSupported() {
