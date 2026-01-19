@@ -31,6 +31,7 @@ type AuthRequest struct {
 	Prompt        []string
 	UiLocales     []language.Tag
 	LoginHint     *string
+	IdTokenHint   string
 	MaxAuthAge    *time.Duration
 	UserID        string
 	Scopes        []string
@@ -110,6 +111,10 @@ func (a *AuthRequest) GetScopes() []string {
 
 func (a *AuthRequest) GetLoginHint() *string {
 	return a.LoginHint
+}
+
+func (a *AuthRequest) GetIdTokenHint() string {
+	return a.IdTokenHint
 }
 
 func (a *AuthRequest) GetState() string {
