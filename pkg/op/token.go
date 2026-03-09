@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/custorium/dpop-go/dpop"
 	"github.com/zitadel/oidc/v3/pkg/crypto"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
@@ -61,8 +62,8 @@ func CreateTokenResponse(ctx context.Context, request IDTokenRequest, client Cli
 	}
 
 	tokenType := oidc.BearerToken
-	if ctx.Value(DPopThumbprint) != nil {
-		tokenType = DPoPHeaderKey
+	if ctx.Value(dpop.DPopThumbprint) != nil {
+		tokenType = dpop.DPoPHeaderKey
 	}
 
 	exp := uint64(validity.Seconds())
@@ -184,7 +185,7 @@ func CreateJWT(ctx context.Context, issuer string, tokenRequest TokenRequest, ex
 		}
 		claims.Claims = privateClaims
 	}
-	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
+	if thumbprint := ctx.Value(dpop.DPopThumbprint); thumbprint != nil {
 		cnf := map[string]any{"jkt": thumbprint}
 		if claims.Claims == nil {
 			claims.Claims = map[string]any{}
@@ -275,7 +276,7 @@ func CreateIDToken(ctx context.Context, issuer string, request IDTokenRequest, v
 		}
 		claims.CodeHash = codeHash
 	}
-	if thumbprint := ctx.Value(DPopThumbprint); thumbprint != nil {
+	if thumbprint := ctx.Value(dpop.DPopThumbprint); thumbprint != nil {
 		cnf := map[string]any{"jkt": thumbprint}
 		if claims.Claims == nil {
 			claims.Claims = map[string]any{}

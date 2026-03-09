@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/custorium/dpop-go/dpop"
 	httphelper "github.com/zitadel/oidc/v3/pkg/http"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
@@ -231,7 +232,7 @@ func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authoriz
 		RequestUri: req.GetID(),
 		ExpiresIn:  90,
 	}
-	MarshalJSONWithStatus(w, response, 200)
+	dpop.MarshalJSONWithStatus(w, response, 200)
 }
 
 // ParseRequestObject parse the `request` parameter, validates the token including the signature
