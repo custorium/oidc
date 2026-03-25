@@ -38,6 +38,7 @@ type AuthRequest interface {
 	GetState() string
 	GetSubject() string
 	GetLoginHint() *string
+	GetPrompt() []string
 	GetIdTokenHint() string
 	GetDone() bool
 }

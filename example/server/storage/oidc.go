@@ -113,6 +113,10 @@ func (a *AuthRequest) GetLoginHint() *string {
 	return a.LoginHint
 }
 
+func (a *AuthRequest) GetPrompt() []string {
+	return a.Prompt
+}
+
 func (a *AuthRequest) GetIdTokenHint() string {
 	return a.IdTokenHint
 }
