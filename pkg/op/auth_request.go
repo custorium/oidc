@@ -233,7 +233,7 @@ func PushedAuthorize(w http.ResponseWriter, r *http.Request, authorizer Authoriz
 		RequestUri: req.GetID(),
 		ExpiresIn:  90,
 	}
-	dpop.MarshalJSONWithStatus(w, response, 200)
+	dpop.MarshalJSONWithStatus(w, response, 201)
 }
 
 // ParseRequestObject parse the `request` parameter, validates the token including the signature
@@ -377,8 +377,8 @@ func ValidateAuthReqScopes(client Client, scopes []string) ([]string, error) {
 			scope == oidc.ScopeEmail ||
 			scope == oidc.ScopePhone ||
 			scope == oidc.ScopeAddress ||
-			scope == oidc.ScopeOfflineAccess) &&
-			!client.IsScopeAllowed(scope)
+			scope == oidc.ScopeOfflineAccess ||
+			client.IsScopeAllowed(scope))
 	})
 	return scopes, nil
 }
