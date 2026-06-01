@@ -47,6 +47,7 @@ type Client interface {
 	RestrictAdditionalIdTokenScopes() func(scopes []string) []string
 	RestrictAdditionalAccessTokenScopes() func(scopes []string) []string
 	IsScopeAllowed(scope string) bool
+	AreScopesAllowed(scopes []string) bool
 	IDTokenUserinfoClaimsAssertion() bool
 	ClockSkew() time.Duration
 }

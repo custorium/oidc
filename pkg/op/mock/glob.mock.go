@@ -176,6 +176,20 @@ func (mr *MockHasRedirectGlobsMockRecorder) IsScopeAllowed(arg0 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsScopeAllowed", reflect.TypeOf((*MockHasRedirectGlobs)(nil).IsScopeAllowed), arg0)
 }
 
+// AreScopesAllowed mocks base method.
+func (m *MockHasRedirectGlobs) AreScopesAllowed(arg0 []string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AreScopesAllowed", arg0)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// AreScopesAllowed indicates an expected call of AreScopesAllowed.
+func (mr *MockHasRedirectGlobsMockRecorder) AreScopesAllowed(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AreScopesAllowed", reflect.TypeOf((*MockHasRedirectGlobs)(nil).AreScopesAllowed), arg0)
+}
+
 // LoginURL mocks base method.
 func (m *MockHasRedirectGlobs) LoginURL(arg0 string) string {
 	m.ctrl.T.Helper()

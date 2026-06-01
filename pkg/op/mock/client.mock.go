@@ -176,6 +176,19 @@ func (mr *MockClientMockRecorder) IsScopeAllowed(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsScopeAllowed", reflect.TypeOf((*MockClient)(nil).IsScopeAllowed), arg0)
 }
 
+func (m *MockClient) AreScopesAllowed(arg0 []string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AreScopesAllowed", arg0)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsScopeAllowed indicates an expected call of AreScopesAllowed.
+func (mr *MockClientMockRecorder) AreScopesAllowed(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AreScopesAllowed", reflect.TypeOf((*MockClient)(nil).AreScopesAllowed), arg0)
+}
+
 // LoginURL mocks base method.
 func (m *MockClient) LoginURL(arg0 string) string {
 	m.ctrl.T.Helper()

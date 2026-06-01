@@ -113,6 +113,12 @@ func (c *Client) IsScopeAllowed(scope string) bool {
 	return scope == CustomScope
 }
 
+// AreScopesAllowed validates if scopes are valid
+// in this example we allow the CustomScope for all clients
+func (c *Client) AreScopesAllowed(scopes []string) bool {
+	return true
+}
+
 // IDTokenUserinfoClaimsAssertion allows specifying if claims of scope profile, email, phone and address are asserted into the id_token
 // even if an access token if issued which violates the OIDC Core spec
 // (5.4. Requesting Claims using Scope Values: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)

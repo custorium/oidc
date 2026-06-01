@@ -28,6 +28,8 @@ func NewClientExpectAny(t *testing.T, appType op.ApplicationType) op.Client {
 			return "login?id=" + id
 		})
 	m.EXPECT().IsScopeAllowed(gomock.Any()).AnyTimes().Return(false)
+	m.EXPECT().AreScopesAllowed(gomock.Any()).AnyTimes().Return(true)
+
 	return c
 }
 

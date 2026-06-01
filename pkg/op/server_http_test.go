@@ -161,6 +161,10 @@ func (c *testClient) IsScopeAllowed(scope string) bool {
 	return false
 }
 
+func (c *testClient) AreScopesAllowed(scopes []string) bool {
+	return true
+}
+
 func (c *testClient) IDTokenUserinfoClaimsAssertion() bool {
 	return false
 }

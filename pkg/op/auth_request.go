@@ -371,6 +371,10 @@ func ValidateAuthReqScopes(client Client, scopes []string) ([]string, error) {
 			WithDescription("The scope of your request is missing. Please ensure some scopes are requested. " +
 				"If you have any questions, you may contact the administrator of the application.")
 	}
+	if !client.AreScopesAllowed(scopes) {
+		return nil, oidc.ErrInvalidScope().
+			WithDescription("Not all requested scopes are defined or mandatory are missing")
+	}
 	scopes = slices.DeleteFunc(scopes, func(scope string) bool {
 		return !(scope == oidc.ScopeOpenID ||
 			scope == oidc.ScopeProfile ||
